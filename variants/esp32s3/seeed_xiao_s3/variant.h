@@ -48,6 +48,8 @@ L76K GPS Module Information : https://www.seeedstudio.com/L76K-GNSS-Module-for-S
 #define SOIL_DRY_MV 2600             // reading in air, calibrate yours
 #define SOIL_WET_MV 1200             // reading in water, calibrate yours
 
+#define VL53_DISTANCE_SENSOR
+
 /*Warning:
     https://www.seeedstudio.com/L76K-GNSS-Module-for-Seeed-Studio-XIAO-p-5864.html
     L76K Expansion Board can not directly used, L76K Reset Pin needs to override or physically remove it,

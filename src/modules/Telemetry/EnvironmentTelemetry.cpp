@@ -1,5 +1,11 @@
 #include "configuration.h"
 
+#ifdef VL53_DISTANCE_SENSOR
+#include <VL53L0X.h>
+static VL53L0X vl53;
+static bool vl53Ready = false;
+#endif
+
 #if HAS_TELEMETRY && !MESHTASTIC_EXCLUDE_ENVIRONMENTAL_SENSOR
 
 #include "../mesh/generated/meshtastic/telemetry.pb.h"
@@ -287,9 +293,22 @@ int32_t EnvironmentTelemetryModule::runOnce()
                 result = DEFAULT_SENSOR_MINIMUM_WAIT_TIME_BETWEEN_READS;
             }
 #ifdef SOIL_MOISTURE_PIN
-#warning SOIL_FIRST_TIME
-            // analog soil sensor isn't an I2C TelemetrySensor, so register it manually
-            result = DEFAULT_SENSOR_MINIMUM_WAIT_TIME_BETWEEN_READS;
+// analog soil sensor isn't an I2C TelemetrySensor, so register it manually
+result = DEFAULT_SENSOR_MINIMUM_WAIT_TIME_BETWEEN_READS;
+#endif
+
+#ifdef VL53_DISTANCE_SENSOR
+#warning VL53_FIRST_TIME
+            vl53.setTimeout(500);
+            if (vl53.init()) {
+                vl53.setMeasurementTimingBudget(200000);  // 200 ms: slower but steadier
+                vl53.startContinuous(250);                // new reading every 250 ms
+                vl53Ready = true;
+                result = DEFAULT_SENSOR_MINIMUM_WAIT_TIME_BETWEEN_READS;
+                LOG_INFO("VL53L0X: ready");
+            } else {
+                LOG_WARN("VL53L0X: init failed, check wiring (address 0x29)");
+            }
 #endif
 
 #ifdef T1000X_SENSOR_EN
@@ -580,6 +599,19 @@ bool EnvironmentTelemetryModule::getEnvironmentTelemetry(meshtastic_Telemetry *m
             hasSensor = true;                 
             LOG_INFO("Soil: raw=%u mV, pct=%d", mv, pct);
         }
+#endif
+
+#ifdef VL53_DISTANCE_SENSOR
+    if (vl53Ready) {
+        uint16_t mm = vl53.readRangeContinuousMillimeters();
+        if (!vl53.timeoutOccurred() && mm < 8190) {       // 8190+ means out of range
+            m->variant.environment_metrics.has_distance = true;
+            m->variant.environment_metrics.distance = mm;
+            valid = true;
+            hasSensor = true;
+            LOG_INFO("VL53L0X: %u mm", mm);
+        }
+    }
 #endif
 
 #ifndef T1000X_SENSOR_EN
