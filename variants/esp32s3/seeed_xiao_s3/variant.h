@@ -43,6 +43,11 @@ L76K GPS Module Information : https://www.seeedstudio.com/L76K-GNSS-Module-for-S
 #define BATTERY_SENSE_RESOLUTION_BITS 12
 #define ADC_MULTIPLIER 2.07
 
+#define SOIL_MOISTURE_PIN 3          // ADC1 pin, pick a free one 
+#define SOIL_MOISTURE_POWER_PIN 4    // optional, drives the sensor's VCC
+#define SOIL_DRY_MV 2600             // reading in air, calibrate yours
+#define SOIL_WET_MV 1200             // reading in water, calibrate yours
+
 /*Warning:
     https://www.seeedstudio.com/L76K-GNSS-Module-for-Seeed-Studio-XIAO-p-5864.html
     L76K Expansion Board can not directly used, L76K Reset Pin needs to override or physically remove it,

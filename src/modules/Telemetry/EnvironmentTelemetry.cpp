@@ -286,6 +286,11 @@ int32_t EnvironmentTelemetryModule::runOnce()
             if (!sensors.empty()) {
                 result = DEFAULT_SENSOR_MINIMUM_WAIT_TIME_BETWEEN_READS;
             }
+#ifdef SOIL_MOISTURE_PIN
+#warning SOIL_FIRST_TIME
+            // analog soil sensor isn't an I2C TelemetrySensor, so register it manually
+            result = DEFAULT_SENSOR_MINIMUM_WAIT_TIME_BETWEEN_READS;
+#endif
 
 #ifdef T1000X_SENSOR_EN
 #elif !MESHTASTIC_EXCLUDE_ENVIRONMENTAL_SENSOR_EXTERNAL
@@ -550,6 +555,32 @@ bool EnvironmentTelemetryModule::getEnvironmentTelemetry(meshtastic_Telemetry *m
         valid = valid || get_metrics;
         hasSensor = true;
     }
+#ifdef SOIL_MOISTURE_PIN
+    {
+    
+    #ifdef SOIL_MOISTURE_POWER_PIN
+            pinMode(SOIL_MOISTURE_POWER_PIN, OUTPUT);
+            digitalWrite(SOIL_MOISTURE_POWER_PIN, HIGH);
+            delay(100);                       // let the sensor settle
+    #endif
+            uint32_t sum = 0;
+            for (int i = 0; i < 16; i++) {
+                sum += analogReadMilliVolts(SOIL_MOISTURE_PIN);
+                delay(2);
+            }
+            uint32_t mv = sum / 16;
+    #ifdef SOIL_MOISTURE_POWER_PIN
+            digitalWrite(SOIL_MOISTURE_POWER_PIN, LOW);
+    #endif
+            int pct = (int)((SOIL_DRY_MV - (int)mv) * 100L / (SOIL_DRY_MV - SOIL_WET_MV));
+            pct = constrain(pct, 0, 100);
+            m->variant.environment_metrics.has_soil_moisture = true;
+            m->variant.environment_metrics.soil_moisture = pct;
+            valid = true;
+            hasSensor = true;                 
+            LOG_INFO("Soil: raw=%u mV, pct=%d", mv, pct);
+        }
+#endif
 
 #ifndef T1000X_SENSOR_EN
     if (ina219Sensor.hasSensor()) {
