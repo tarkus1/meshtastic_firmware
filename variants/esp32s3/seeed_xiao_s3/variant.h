@@ -45,8 +45,8 @@ L76K GPS Module Information : https://www.seeedstudio.com/L76K-GNSS-Module-for-S
 
 #define SOIL_MOISTURE_PIN 3          // ADC1 pin, pick a free one 
 #define SOIL_MOISTURE_POWER_PIN 4    // optional, drives the sensor's VCC
-#define SOIL_DRY_MV 2600             // reading in air, calibrate yours
-#define SOIL_WET_MV 1200             // reading in water, calibrate yours
+#define SOIL_DRY_MV 2635             // reading in air, calibrate yours
+#define SOIL_WET_MV 1223             // reading in water, calibrate yours
 
 #define VL53_DISTANCE_SENSOR
 
