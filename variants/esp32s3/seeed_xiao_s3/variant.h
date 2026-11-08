@@ -38,10 +38,11 @@ L76K GPS Module Information : https://www.seeedstudio.com/L76K-GNSS-Module-for-S
 #define BUTTON_PIN 21 // This is the Program Button
 #define BUTTON_NEED_PULLUP
 
-#define BATTERY_PIN 2
+// #define BATTERY_PIN 2 // disabled for sensor without voltage divider etc.
+// #define ADC_MULTIPLIER 2.07
+
 #define ADC_CHANNEL ADC1_GPIO2_CHANNEL
 #define BATTERY_SENSE_RESOLUTION_BITS 12
-#define ADC_MULTIPLIER 2.07
 
 #define SOIL_MOISTURE_PIN 3          // ADC1 pin, pick a free one 
 #define SOIL_MOISTURE_POWER_PIN 4    // optional, drives the sensor's VCC
